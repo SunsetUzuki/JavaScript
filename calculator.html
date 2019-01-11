@@ -1,0 +1,206 @@
+<html>
+<script
+  src="https://code.jquery.com/jquery-3.3.1.js"
+  integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+  crossorigin="anonymous"></script>
+
+<style type="text/css">
+	body{
+		zoom:4;
+	}
+	button{
+		width: 100%;
+	}
+	td{
+		width: 35px;
+	}
+	input{
+		text-align: right;
+	}
+	.numberBtn{
+		background-color: #787878;
+	}
+	.operationBtn{
+		background-color: Plum;
+	}
+
+</style>
+
+<table>
+<tr>
+	<td colspan="4"><input id="mainField" maxlength="8"></td>
+</tr>
+	<tr>
+	<td><button id="backspaceBtn"><-</button></td>
+	<td><button id="clearEntryBtn">CE</button></td>	
+	<td><button id="clearBtn">C</button></td>	
+	<td><button class="operationBtn">+</button></td>		
+
+	</tr>
+	<tr>
+	<td><button class="numberBtn">7</button></td>
+	<td><button class="numberBtn">8</button></td>	
+	<td><button class="numberBtn">9</button></td>	
+	<td><button class="operationBtn">-</button></td>		
+
+	</tr>
+
+	<tr>
+	<td><button class="numberBtn">4</button></td>
+	<td><button class="numberBtn">5</button></td>	
+	<td><button class="numberBtn">6</button></td>	
+	<td><button class="operationBtn">*</button></td>		
+
+	</tr>
+
+	<tr>
+	<td><button class="numberBtn">1</button></td>
+	<td><button class="numberBtn">2</button></td>	
+	<td><button class="numberBtn">3</button></td>	
+	<td><button class="operationBtn">/</button></td>		
+
+	</tr>
+
+	<tr>
+	<td><button id="dotBtn">.</button></td>
+	<td><button class="numberBtn">0</button></td>	
+	<td colspan="2" id="calculateBtn"><button>=</button></td>	
+			
+
+	</tr>
+
+	
+</table>
+
+<script>
+
+var currentOperation=null;
+var firstArgument=null;
+var isOperationDone=false;
+
+function tryToInsertNewNumber(oldValue, additionalValue){
+	if(isOperationDone){
+					$("#mainField").val('');
+					oldValue='';
+					isOperationDone=false;
+				}
+			if(oldValue.length<8){
+			if(oldValue=='0'&& additionalValue==0)
+				return;
+			$("#mainField").val(oldValue+additionalValue);
+}
+}
+
+	$(function(){
+		$(".numberBtn").click(function(numberBtnClickedEvent){
+			tryToInsertNewNumber($("#mainField").val(),$(numberBtnClickedEvent.target).text());
+		});
+
+		$("#backspaceBtn").click(function(){
+
+let val=$("#mainField").val();
+let l=val.length;
+if(isNaN(val)||val=='Infinity'){
+	$("#mainField").val('');
+}else if(l>0){
+	$("#mainField").val(val.substr(0,l-1));
+}
+		});
+
+		$("#dotBtn").click(function(){
+			let val=$("#mainField").val();
+if(val.length>0&&val.indexOf('.')==-1){
+	$("#mainField").val(val+ '.');
+	}
+		});
+
+		$(".operationBtn").click(function(operationBtnClickedEvent){
+			let val=$("#mainField").val();
+			if(isNaN(val)||val=='Infinity')
+				return;
+			if(currentOperation==null){
+				firstArgument=$("#mainField").val();
+				$("#mainField").val('');
+			}
+			currentOperation=$(operationBtnClickedEvent.target).text();
+						
+		});
+		$("#calculateBtn").click(function(){
+if(currentOperation==null||firstArgument==null||$("#mainField").val()=='')
+	return;
+let a=parseFloat(firstArgument);
+let b=parseFloat($("#mainField").val());
+let result=null;
+console.log(a);
+console.log(b);
+
+switch(currentOperation){
+	case '+':result=a+b;
+	break;
+	case '-':result=a-b;
+	break;
+	case '*':result=a*b;
+	break;
+	case '/':result=a/b;
+	break;
+}
+$("#mainField").val(result);
+firstArgument=null;
+currentOperation=null;
+isOperationDone=true;
+		});
+		$("#clearEntryBtn").click(function(){
+			$("#mainField").val('');
+		});
+		$("#clearBtn").click(function(){
+			$("#mainField").val('');
+			firstArgument=null;
+			currentOperation=null;
+		});
+		$("#mainField").keydown(function (e) {
+        // Allow: backspace, delete, tab, escape, enter and .
+        if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 110]) !== -1 ||
+             // Allow: Ctrl/cmd+A
+            (e.keyCode == 65 && (e.ctrlKey === true || e.metaKey === true)) ||
+             // Allow: Ctrl/cmd+C
+            (e.keyCode == 67 && (e.ctrlKey === true || e.metaKey === true)) ||
+             // Allow: Ctrl/cmd+X
+            (e.keyCode == 88 && (e.ctrlKey === true || e.metaKey === true)) ||
+             // Allow: home, end, left, right
+            (e.keyCode >= 35 && e.keyCode <= 39)) {
+                 // let it happen, don't do anything
+                 return;
+        }
+        if (e.keyCode==190){
+if($("#mainField").val().indexOf('.')!=-1)
+	e.preventDefault();
+else if($("#mainField").val()=='')
+	e.preventDefault();
+else
+	return;
+        }
+
+        // Ensure that it is a number and stop the keypress
+        else if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+            e.preventDefault();
+        } else if((e.keyCode==48||e.keyCode==96)&& $("#mainField").val()=='0'){
+        	e.preventDefault();
+        } 
+    });
+
+		
+
+		$("#mainField").bind("paste", function(e){
+			var pastedData=e.originalEvent.clipboardData.getData('text');
+var onlyDigit=pastedData.replace(/\D/g,'');
+			event.preventDefault();
+			$("#mainField").val(onlyDigit);
+			
+			
+
+		});
+	});
+
+</script>
+
+</html>
